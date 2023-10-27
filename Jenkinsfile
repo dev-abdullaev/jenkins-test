@@ -1,32 +1,36 @@
 pipeline {
-    agent any
-    options {
-        buildDiscarder(logRotator(daysToKeepStr: '10', numToKeepStr: '10'))
-        timeout(time: 12, unit: 'HOURS')
-        timestamps()
+    agent {
+        docker { image 'public.ecr.aws/docker/library/maven:3.9-sapmachine' }
     }
     stages {
-        stage('Requirements') {
+        stage('Source') {
             steps {
-                // this step is required to make sure the script
-                // can be executed directly in a shell
-                sh('chmod +x ./algorithm.sh')
+                sh 'mvn --version'
+                sh 'git --version'
+                git branch: 'main',
+                    url: 'https://github.com/LinkedInLearning/essential-jenkins-2468076.git'
             }
         }
-        stage('Build') {
+        stage('Clean') {
             steps {
-                // the algorithm script creates a file named report.txt
-                sh('./algorithm.sh')
-                
-                // this step archives the report
-                archiveArtifacts allowEmptyArchive: true,
-                    artifacts: '*.txt',
-                    fingerprint: true,
-                    onlyIfSuccessful: true
+                dir("${env.WORKSPACE}/Ch04/04_03-docker-agent"){
+                    sh 'mvn clean'
+                }
+            }
+        }
+        stage('Test') {
+            steps {
+                dir("${env.WORKSPACE}/Ch04/04_03-docker-agent"){
+                    sh 'mvn test'
+                }
+            }
+        }
+        stage('Package') {
+            steps {
+                dir("${env.WORKSPACE}/Ch04/04_03-docker-agent"){
+                    sh 'mvn package -DskipTests'
+                }
             }
         }
     }
 }
-
-
-
