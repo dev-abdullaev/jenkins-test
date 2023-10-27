@@ -17,7 +17,7 @@ pipeline {
             steps {
                 // the algorithm script creates a file named report.txt
                 sh('./algorithm.sh')
-
+                
                 // this step archives the report
                 archiveArtifacts allowEmptyArchive: true,
                     artifacts: '*.txt',
