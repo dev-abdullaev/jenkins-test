@@ -31,8 +31,6 @@
 
 node{
 
-  git branch: "master", url: "http://192.168.100.185:3000/parsa/Django_cicd" 
-
   stage ('Build the Docker image') {
     sh "echo building the image..."
     sh "docker-compose -f production.yml build"
